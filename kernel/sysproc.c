@@ -99,6 +99,11 @@ sys_uptime(void)
 uint64
 sys_trace(void)
 {
-    printf("trace is called\n");
+    int trace_mask;
+    if (argint(0, &trace_mask) < 0)
+        return -1;
+
+    struct proc *p = myproc();
+    p->mask = trace_mask;
     return 0;
 }
