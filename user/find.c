@@ -21,54 +21,45 @@ int main(int argc, char *argv[])
 
 void find(char *path, char *target_file)
 {
-    int fd;
-    struct stat st;
-    struct dirent de;
     char buf[512], *p;
+    int fd;
+    struct dirent de;
+    struct stat st;
 
-    if ((fd = open(path, 0)) < 0)
-    {
-        printf("ERROR: cannot open %s\n", path);
+    if((fd = open(path,0)) < 0){
+        printf("cannot open\n");
         return;
     }
 
-    if (fstat(fd, &st) < 0)
-    {
-        printf("ERROR: cannot stat %s\n", path);
-        close(fd);
+    if(fstat(fd, &st) < 0){
+        printf("cannot stat");
         return;
     }
 
-    // read the name of each file/folder under the folder specified by fd, which is $path, name is de.name
-    while (read(fd, &de, sizeof(de)) == sizeof(de))
-    {
+    while(read(fd,&de,sizeof(de)) == sizeof(de)){
+        //add the full path
         strcpy(buf, path);
         p = buf + strlen(buf);
         *p++ = '/';
-        if (de.inum == 0)
+        if(de.inum == 0)
             continue;
-        // get the full path name of the current file/directory selected
         memmove(p, de.name, DIRSIZ);
         p[DIRSIZ] = 0;
 
-        if (stat(buf, &st) < 0)
-        {
-            printf("ERROR: cannot stat %s\n", buf);
+        if(stat(buf,&st) < 0){
+            printf("connot stat");
         }
 
-        switch (st.type)
-        {
-        case T_FILE:
-            if (!strcmp(target_file, de.name))
-            {
-                printf("%s\n", buf);
-            }
-            break;
-        case T_DIR:
-            if (strcmp(de.name, ".") && strcmp(de.name, ".."))
-            {
-                find(buf, target_file);
-            }
+        switch(st.type){
+            case T_FILE:
+                if(!strcmp(de.name,target_file)){
+                    printf("%s\n", buf);
+                }
+                break;
+            case T_DIR:
+                if (strcmp(de.name, ".") && strcmp(de.name, "..")) {
+                    find(buf, target_file);
+                }
         }
     }
     close(fd);
